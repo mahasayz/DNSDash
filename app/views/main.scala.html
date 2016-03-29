@@ -82,53 +82,75 @@
                     <button type="button" class="btn btn-primary"><span class="flag-icon flag-icon-cn"></span> SHA</button>
                 </div>-->
 
+                <div class="input-group">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span></span>
+                    <input id="filter" type="text" class="form-control" placeholder="Type here...">
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Area</th>
-                                <th>
-                                    <h1>
-                                        <span class="label label-primary"><span class="flag-icon flag-icon-us"></span> ASH</span>
-                                    </h1>
-                                </th>
-                                <th>
-                                    <h1>
-                                        <span class="label label-primary"><span class="flag-icon flag-icon-nl"></span> AMS</span>
-                                    </h1>
-                                </th>
-                                <th>
-                                    <h1>
-                                        <span class="label label-primary"><span class="flag-icon flag-icon-cn"></span> SHA</span>
-                                    </h1>
-                                </th>
-                                <th>
-                                    <h1>
-                                        <span class="label label-primary"><span class="flag-icon flag-icon-hk"></span> HKG</span>
-                                    </h1>
-                                </th>
-                                <th>
-                                    <h1>
-                                        <span class="label label-primary"><span class="flag-icon flag-icon-sg"></span> SIN</span>
-                                    </h1>
-                                </th>
+                                <th>Hostname</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @for(area <- List("US", "EU", "CHINA", "N ASIA", "S ASIA")) {
-                                <tr>
-                                    <td>@area</td>
-                                    <div class="btn-group" role="group" data-toggle="buttons">
-                                        <td><button type="button" class="btn btn-default"><span class="flag-icon flag-icon-us"></span> ASH</button></td>
-                                        <td><button type="button" class="btn btn-default"><span class="flag-icon flag-icon-nl"></span> AMS</button></td>
-                                        <td><button type="button" class="btn btn-default"><span class="flag-icon flag-icon-cn"></span> SHA</button></td>
-                                        <td><button type="button" class="btn btn-default"><span class="flag-icon flag-icon-hk"></span> HKG</button></td>
-                                        <td><button type="button" class="btn btn-default"><span class="flag-icon flag-icon-sg"></span> SIN</button></td>
-                                    </div>
-                                </tr>
-                            }
+                        <tbody class="searchable">
+                            <tr>
+                                <td>ams.www.agoda.com</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="AMS" data-product="WWW">Route</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ash.www.agoda.com</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="ASH" data-product="WWW">Route</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ams.xml.agoda.com</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="AMS" data-product="XML">Route</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ams.xml.agoda.com</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="ASH" data-product="XML">Route</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                        <span data-bind="label">Select One</span>&nbsp;<span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a href="#"><span class="flag-icon flag-icon-us"></span> ASH</a></li>
+                                        <li><a href="#"><span class="flag-icon flag-icon-nl"></span> AMS</a></li>
+                                        <li><a href="#"><span class="flag-icon flag-icon-sg"></span> SIN</a></li>
+                                        <li><a href="#"><span class="flag-icon flag-icon-hk"></span> HKG</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -138,10 +160,43 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script>
-        $('.btn').button();
-    </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="@routes.Assets.versioned("js/bootstrap.min.js")"></script>
+    <script>
+
+        $(document).ready(function () {
+
+            (function ($) {
+                $('#filter').keyup(function () {
+                    var rex = new RegExp($(this).val(), 'i');
+                    $('.searchable tr').hide();
+                    $('.searchable tr').filter(function () {
+                        return rex.test($(this).text());
+                    }).show();
+                })
+            }(jQuery));
+
+        });
+
+        $( document.body ).on( 'click', '.dropdown-menu li', function( event ) {
+          var $target = $( event.currentTarget );
+          $target.closest( '.btn-group' )
+             .find( '[data-bind="label"]' ).html( $target.html() )
+                .end()
+             .children( '.dropdown-toggle' ).dropdown( 'toggle' );
+          return false;
+       });
+
+        $('#myModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) // Button that triggered the modal
+          var dc = button.data('dc') // Extract info from data-* attributes
+          var product = button.data('product')
+          // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+          // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+          var modal = $(this)
+          modal.find('.modal-title').text('Route ' + product + ' traffic of ' + dc)
+        })
+
+    </script>
     </body>
 </html>
