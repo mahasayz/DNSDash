@@ -16,7 +16,7 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="@routes.Assets.versioned("images/favicon.png")">
 
     <title>Dashboard Template for Bootstrap</title>
 
@@ -62,13 +62,13 @@
                 <ul class="nav nav-sidebar">
                     <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
                     <li class="dropdown">
-                        <a hred="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Product<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">www</a></li>
-                            <li><a href="#">XML</a></li>
-                            <!--<li role="separator" class="divider"></li>-->
-                            <li><a href="#">search api</a></li>
-                            <li><a href="#">BF</a></li>
+                        <a hred="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Zones<span class="caret"></span></a>
+                        <ul class="dropdown-menu" id="zones-dropdown">
+                            <!--<li><a href="#">www</a></li>-->
+                            <!--<li><a href="#">XML</a></li>-->
+                            <!--&lt;!&ndash;<li role="separator" class="divider"></li>&ndash;&gt;-->
+                            <!--<li><a href="#">search api</a></li>-->
+                            <!--<li><a href="#">BF</a></li>-->
                         </ul>
                     </li>
                 </ul>
@@ -87,39 +87,21 @@
                     <input id="filter" type="text" class="form-control" placeholder="Type here...">
                 </div>
 
+                <div class="alert alert-success" style="display: none">
+                    <a class="close" onclick="$('.alert').hide()">×</a>
+                    <strong>Success!</strong> Got invoked ok.
+                </div>
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Hostname</th>
                                 <th>Action</th>
+                                <th>Points To</th>
                             </tr>
                         </thead>
                         <tbody class="searchable">
-                            <tr>
-                                <td>ams.www.agoda.com</td>
-                                <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="AMS" data-product="WWW">Route</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ash.www.agoda.com</td>
-                                <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="ASH" data-product="WWW">Route</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ams.xml.agoda.com</td>
-                                <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="AMS" data-product="XML">Route</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>ams.xml.agoda.com</td>
-                                <td>
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-dc="ASH" data-product="XML">Route</button>
-                                </td>
-                            </tr>
+                            @content
                         </tbody>
                     </table>
                 </div>
@@ -138,21 +120,23 @@
                                         <span data-bind="label">Select One</span>&nbsp;<span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu" role="menu">
-                                        <li><a href="#"><span class="flag-icon flag-icon-us"></span> ASH</a></li>
-                                        <li><a href="#"><span class="flag-icon flag-icon-nl"></span> AMS</a></li>
-                                        <li><a href="#"><span class="flag-icon flag-icon-sg"></span> SIN</a></li>
-                                        <li><a href="#"><span class="flag-icon flag-icon-hk"></span> HKG</a></li>
+                                        <!--<li><a href="#"><span class="flag-icon flag-icon-us"></span> ASH</a></li>-->
+                                        <!--<li><a href="#"><span class="flag-icon flag-icon-nl"></span> AMS</a></li>-->
+                                        <!--<li><a href="#"><span class="flag-icon flag-icon-sg"></span> SIN</a></li>-->
+                                        <!--<li><a href="#"><span class="flag-icon flag-icon-hk"></span> HKG</a></li>-->
                                     </ul>
                                 </div>
+                                <br/>
+                                <input type="checkbox" name="allDC"> Repeat this across all ZONES
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
+                                <button type="button" class="btn btn-primary" id="updateInfo">Save changes</button>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                @debug()
             </div>
         </div>
     </div>
@@ -163,6 +147,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="@routes.Assets.versioned("js/bootstrap.min.js")"></script>
     <script>
+
+        var global_selected = ""
 
         $(document).ready(function () {
 
@@ -176,6 +162,43 @@
                 })
             }(jQuery));
 
+            $.ajax({
+                type: 'GET',
+                url: '/getzones',
+                success: function(data) {
+                    console.log(data);
+                    var zoneList = ""
+                    $.each(data, function(key, object) {
+                        $.each(object, function(key, value) {
+                            zoneList = zoneList + "<li><a href=\"#\">" + value + "</a></li>"
+                        });
+                        console.log(zoneList)
+                        $('#zones-dropdown').html(zoneList)
+                    });
+                }
+            });
+
+        });
+
+        $('#updateInfo').on('click', function() {
+            $.ajax({
+                type: 'GET',
+                url: '/update',
+                data: {
+                    from_ip: $('.dropdown-menu li a').attr('href'),
+                    to_ip: global_selected
+                },
+                success: function(data) {
+                    console.log(data);
+                    $('.alert').show();
+                    $('#myModal').modal('hide');
+                }
+            });
+        });
+
+        $('.dropdown-menu li a').click(function() {
+            var selectedText = $(this).text();
+            console.log(selectedText);
         });
 
         $( document.body ).on( 'click', '.dropdown-menu li', function( event ) {
@@ -195,6 +218,32 @@
           // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
           var modal = $(this)
           modal.find('.modal-title').text('Route ' + product + ' traffic of ' + dc)
+
+          var recordList = "";
+
+          $.ajax({
+                type: 'GET',
+                url: '/failover',
+                data: { record: dc },
+                success: function(data) {
+                    console.log(data);
+                    $.each(data, function(key, object) {
+                        $.each(object, function(key, value) {
+                            recordList = recordList + "<li><a href=\"" + dc + "\">" + value + "</a></li>"
+                        });
+                        console.log(recordList)
+                        $('.dropdown-menu').html(recordList)
+                    });
+                }
+            });
+          $(document).ajaxComplete(function() {
+            $('.dropdown-menu li a').click(function() {
+                var selectedText = $(this).text();
+                console.log(selectedText);
+                global_selected = selectedText;
+            });
+          });
+          $('.alert').hide();
         })
 
     </script>

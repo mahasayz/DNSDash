@@ -9,5 +9,12 @@ GET     /count                      controllers.CountController.count
 # An example controller showing how to write asynchronous code
 GET     /message                    controllers.AsyncController.message
 
+# Routing to check Verisign SOAP service
+GET     /failover                   controllers.WSDLController.getFailOverInfo(record: String, zone: Option[String])
+GET     /failover/list              controllers.WSDLController.getFailOverInfoList
+GET     /update                     controllers.WSDLController.update(from_ip: String, to_ip: String)
+GET     /getzones                   controllers.WSDLController.getGeoLocationViewSets
+GET     /test                       controllers.WSDLController.getConfig
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
